@@ -1,0 +1,51 @@
+# Blueprint Render - Bot Ticket Server Secondari Roma RP
+# Crea in un colpo solo: il bot + sito (web service Docker) e il database PostgreSQL.
+# Controlla i piani/prezzi aggiornati su https://render.com/pricing prima di confermare.
+databases:
+  - name: roma-rp-tickets-db
+    databaseName: tickets
+    user: tickets
+    plan: basic-256mb # il piano "free" di Render scade dopo 30 giorni: non usarlo per un servizio ufficiale
+
+services:
+  - type: web
+    name: bot-ticket-roma-rp
+    runtime: docker
+    plan: starter # il piano "free" va in standby e il bot risulterebbe offline su Discord
+    healthCheckPath: /status
+    autoDeploy: true
+    envVars:
+      - key: DB_PROVIDER
+        value: postgresql
+      - key: DB_CONNECTION_URL
+        fromDatabase:
+          name: roma-rp-tickets-db
+          property: connectionString
+      # --- da compilare nella dashboard di Render (sync: false = non salvati nel repo) ---
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: DISCORD_SECRET
+        sync: false
+      - key: ENCRYPTION_KEY # almeno 48 caratteri, vedi README
+        sync: false
+      - key: HTTP_EXTERNAL # es. https://bot-ticket-roma-rp.onrender.com (senza / finale)
+        sync: false
+      # --- già pronti ---
+      - key: HTTP_HOST
+        value: 0.0.0.0
+      - key: HTTP_PORT
+        value: "10000"
+      - key: PORT
+        value: "10000"
+      - key: HTTP_TRUST_PROXY
+        value: "true"
+      - key: NODE_ENV
+        value: production
+      - key: PUBLIC_BOT
+        value: "false"
+      - key: PUBLISH_COMMANDS
+        value: "true"
+      - key: SUPER
+        value: "1254356172631179297"
+      - key: STAFF_OWNER_ID
+        value: "1254356172631179297"

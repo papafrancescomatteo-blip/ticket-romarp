@@ -1,0 +1,12 @@
+# ignore everything
+*
+# except these directories
+!db
+!scripts
+!src
+!site
+!user
+# and these files
+!.npmrc
+!package.json
+!bun.lock

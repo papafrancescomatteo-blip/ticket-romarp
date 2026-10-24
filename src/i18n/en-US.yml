@@ -1,0 +1,44 @@
+buttons:
+  accept_close_request:
+    emoji: ✅
+    text: Accept
+  cancel:
+    text: Cancel
+    emoji: ➖
+  claim:
+    emoji: 🙌
+    text: Claim
+  close:
+    emoji: ✖️
+    text: Close
+  confirm_open:
+    emoji: ✅
+    text: Create ticket
+  create:
+    emoji: 🎫
+    text: Create a ticket
+  edit:
+    emoji: ✏️
+    text: Edit
+  reject_close_request:
+    emoji: ✖️
+    text: Reject
+  transcript:
+    emoji: 📄
+    text: Transcript
+  unclaim:
+    emoji: ♻️
+    text: Release
+commands:
+  message:
+    create:
+      name: Create ticket from message
+    pin:
+      not_pinnable:
+        description: |
+          This message can't be pinned.
+          Please ask an administrator to check the bot's permissions.
+  slash:
+    add:
+      not_staff:
+        description: Only staff members can add members to others' tickets.

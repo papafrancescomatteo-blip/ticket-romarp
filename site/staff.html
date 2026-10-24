@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Area staff · Roma RP Ticket</title>
+	<link rel="stylesheet" href="/site/style.css">
+</head>
+<body>
+	<header class="top">
+		<div class="wrap">
+			<a class="brand" href="/"><span class="logo">🎫</span> Roma RP · Area staff</a>
+			<span class="spacer"></span>
+			<div class="userbox hidden" id="userbox">
+				<img id="user-avatar" alt="">
+				<span id="user-name"></span>
+				<a class="btn secondary small" href="/auth/logout">Esci</a>
+			</div>
+		</div>
+	</header>
+
+	<!-- stato: caricamento / login / non autorizzato -->
+	<main class="wrap" id="gate">
+		<div class="center-box">
+			<h1>Caricamento…</h1>
+		</div>
+	</main>
+
+	<!-- pannello -->
+	<main class="wrap hidden" id="app">
+		<div class="tabs">
+			<button class="tab active" data-tab="tickets">Ticket</button>
+			<button class="tab hidden" data-tab="access" id="tab-access">Accessi staff</button>
+		</div>
+
+		<section id="view-tickets">
+			<div class="stats" id="servers"></div>
+
+			<div class="filters">
+				<select id="f-status">
+					<option value="open">Aperti</option>
+					<option value="closed">Chiusi</option>
+					<option value="all">Tutti</option>
+				</select>
+				<select id="f-priority">
+					<option value="">Ogni priorità</option>
+					<option value="HIGH">Alta</option>
+					<option value="MEDIUM">Media</option>
+					<option value="LOW">Bassa</option>
+				</select>
+				<input id="f-q" type="search" placeholder="N° ticket o ID Discord utente" style="min-width:240px">
+				<button class="btn small" id="f-go">Cerca</button>
+			</div>
+
+			<div class="table-wrap">
+				<table>
+					<thead>
+						<tr><th>#</th><th>Server</th><th>Utente</th><th>Argomento</th><th>Priorità</th><th>Stato</th><th>Creato</th></tr>
+					</thead>
+					<tbody id="rows"></tbody>
+				</table>
+			</div>
+			<div class="empty hidden" id="empty">Nessun ticket trovato con questi filtri.</div>
+			<div class="pager">
+				<button class="btn secondary small" id="prev">← Precedente</button>
+				<span id="pageinfo"></span>
+				<button class="btn secondary small" id="next">Successiva →</button>
+			</div>
+		</section>
+
+		<section id="view-access" class="hidden">
+			<h2 style="margin-top:0">Accessi all'area staff</h2>
+			<p style="color:var(--muted)">Solo gli ID Discord elencati qui (più i proprietari) possono entrare. Aggiungi l'ID numerico dell'utente (Discord → Impostazioni → Avanzate → Modalità sviluppatore → tasto destro sull'utente → Copia ID).</p>
+			<div class="filters">
+				<input id="a-id" placeholder="ID Discord (es. 1254356172631179297)" style="min-width:280px" inputmode="numeric">
+				<input id="a-note" placeholder="Nota (nome / ruolo)" maxlength="100" style="min-width:220px">
+				<button class="btn gold small" id="a-add">Autorizza</button>
+			</div>
+			<div class="table-wrap">
+				<table>
+					<thead><tr><th>ID Discord</th><th>Utente</th><th>Nota</th><th>Ruolo</th><th></th></tr></thead>
+					<tbody id="access-rows"></tbody>
+				</table>
+			</div>
+		</section>
+	</main>
+
+	<!-- dettaglio ticket -->
+	<div class="drawer-bg" id="bg"></div>
+	<aside class="drawer" id="drawer" aria-label="Dettaglio ticket"></aside>
+	<div class="toast" id="toast"></div>
+
+	<script src="/site/staff.js"></script>
+</body>
+</html>
