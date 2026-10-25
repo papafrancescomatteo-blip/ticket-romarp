@@ -294,11 +294,11 @@ module.exports = class TicketManager {
 									const field = new TextInputBuilder()
 										.setCustomId(q.id)
 										.setLabel(q.label)
-										.setStyle(q.style)
-										.setMaxLength(Math.min(q.maxLength, 1000))
-										.setMinLength(q.minLength)
-										.setPlaceholder(q.placeholder)
-										.setRequired(q.required);
+										.setStyle(q.style || 2)
+										.setMaxLength(Math.min(q.maxLength || 1000, 1000))
+										.setMinLength(q.minLength || 0)
+										.setRequired(!!q.required);
+									if (q.placeholder) field.setPlaceholder(q.placeholder);
 									if (q.value) field.setValue(q.value);
 									return new ActionRowBuilder().setComponents(field);
 								} else if (q.type === 'MENU') {
@@ -730,6 +730,7 @@ module.exports = class TicketManager {
 			this.client.log.warn.tickets('An error occurred whilst creating ticket', channel.id);
 			this.client.log.error.tickets(ref);
 			this.client.log.error.tickets(error);
+			require('../error').recordError(this.client, 'creazione ticket', ref, error);
 			await interaction.editReply({
 				components: [],
 				embeds: [
