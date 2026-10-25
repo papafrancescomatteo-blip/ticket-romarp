@@ -106,7 +106,49 @@ const client = new Client(config, log);
 config = client.config;
 log = client.log;
 
-// start the bot and then the web server
-client.login().then(() => {
+// Avvia subito il sito (cosi' Render vede la porta aperta anche se il login a Discord e' lento)
+// e fai partire il login a Discord in parallelo. `client.prisma` viene creato in modo sincrono dentro `login()`.
+// DISABLE_BOT_LOGIN=true: avvia solo il sito, senza collegare il bot a Discord
+// (serve se lo stesso token e' gia' usato da un altro server, per non rispondere due volte)
+if (process.env.DISABLE_BOT_LOGIN === 'true') {
+	log.warn('DISABLE_BOT_LOGIN=true: il bot NON si collega a Discord, parte solo il sito.');
+	client.lastLoginError = 'Login disattivato (DISABLE_BOT_LOGIN=true)';
 	http(client);
+} else {
+	const loginPromise = client.login();
+	http(client);
+	loginPromise.catch(error => {
+		client.lastLoginError = String(error?.message || error);
+		log.error('Login a Discord fallito: ' + client.lastLoginError);
+	});
+}
+client.on('error', error => { client.lastLoginError = String(error?.message || error); });
+client.on('shardDisconnect', event => {
+	client.lastGatewayClose = {
+		code: event?.code ?? null,
+		reason: event?.reason ?? null,
+	};
+	log.warn(`Connessione a Discord chiusa (codice ${event?.code}). 4014 = intents non attivi, 4004 = token non valido.`);
 });
+
+// Diagnostica: se dopo 90 secondi il bot non e' collegato, scrive nei log il motivo probabile (senza mostrare segreti).
+const watchdog = setTimeout(async () => {
+	log.warn('Il bot non si e\' ancora collegato a Discord dopo 90 secondi. Controllo...');
+	const token = process.env.DISCORD_TOKEN || '';
+	log.warn(`DISCORD_TOKEN: ${token ? token.split('.').length + ' parti separate da punto (atteso: 3), lunghezza ' + token.length : 'NON IMPOSTATO'}${token !== token.trim() ? ' - ATTENZIONE: contiene spazi all\'inizio o alla fine' : ''}`);
+	try {
+		const res = await fetch('https://discord.com/api/v10/gateway');
+		const body = (await res.text()).replace(/\s+/g, ' ').slice(0, 200);
+		log.warn(`Risposta di Discord (/gateway): HTTP ${res.status} - ${body}`);
+	} catch (error) {
+		log.warn('Impossibile raggiungere Discord: ' + error.message);
+	}
+}, 90 * 1000);
+client.once('ready', () => clearTimeout(watchdog));
+
+// Log extra solo se DEBUG_DISCORD=true (variabile d'ambiente)
+if (process.env.DEBUG_DISCORD === 'true') {
+	client.on('debug', message => log.info('[discord.js] ' + String(message).slice(0, 300)));
+	client.on('error', error => log.error('[discord.js] ' + error.message));
+	client.rest.on('rateLimited', info => log.warn(`[discord.js] rate limit: ${info.method} ${info.route} riprova tra ${info.timeToReset}ms`));
+}
