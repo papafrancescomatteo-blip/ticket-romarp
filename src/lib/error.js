@@ -4,6 +4,22 @@ const {
 	codeBlock,
 } = require('discord.js');
 
+// salva gli ultimi errori in memoria (visibili nella pagina diagnostica) e li scrive su console in una riga
+module.exports.recordError = (client, where, ref, error) => {
+	try {
+		const entry = {
+			code: error?.code ?? null,
+			message: String(error?.message ?? error),
+			ref,
+			stack: String(error?.stack ?? '').split('\n').slice(0, 6).map(l => l.trim()),
+			time: new Date().toISOString(),
+			where,
+		};
+		client.lastErrors = [entry, ...(client.lastErrors || [])].slice(0, 20);
+		console.error(`[ERRORE ${ref}] ${where}: ${entry.message}`);
+	} catch { /* mai bloccare la risposta all'utente */ }
+};
+
 /**
  *
  * @param {Object} event
@@ -20,6 +36,7 @@ module.exports.handleInteractionError = async event => {
 
 	const ref = getSUID();
 	client.log.error.buttons(ref);
+	module.exports.recordError(client, interaction.isButton() ? `button ${event.button?.id}` : interaction.isModalSubmit() ? `modal ${event.modal?.id}` : interaction.isCommand() ? `command ${event.command?.name}` : 'menu', ref, error);
 
 	if (interaction.isAnySelectMenu()) {
 		client.log.error.menus(`"${event.menu.id}" menu execution error:`, error);
