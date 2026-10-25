@@ -31,7 +31,7 @@ async function quickPool(num, name, fun, options) {
  */
 function reusablePool(num, name, options) {
 	const size = num < 1 ? Math.ceil(num * (parseInt(process.env.CPU_LIMIT) || cpus().length)) : num;
-	const pool = Pool(() => spawn(new Worker(`./workers/${name}.js`)), {
+	const pool = Pool(() => spawn(new Worker(`./workers/${name}.js`), { timeout: 120000 }), {
 		...options,
 		size,
 	});
@@ -45,7 +45,7 @@ function reusablePool(num, name, options) {
  * @returns {Promise<any}
  */
 async function quick(name, fun) {
-	const thread = await spawn(new Worker(`./workers/${name}.js`));
+	const thread = await spawn(new Worker(`./workers/${name}.js`), { timeout: 120000 });
 	try {
 		// ! this await is extremely important
 		return await fun(thread);
@@ -60,7 +60,7 @@ async function quick(name, fun) {
  * @returns {Promise<{terminate: function}>}
  */
 async function reusable(name) {
-	const thread = await spawn(new Worker(`./workers/${name}.js`));
+	const thread = await spawn(new Worker(`./workers/${name}.js`), { timeout: 120000 });
 	thread.terminate = () => Thread.terminate(thread);
 	return thread;
 };
